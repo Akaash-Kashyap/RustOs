@@ -31,7 +31,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
+    serial_println!("[failed]");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
     loop {}
@@ -55,11 +55,13 @@ pub enum QemuExitCode {
     Failed = 0x11,
 }
 
+const QEMU_EXIT_PORT: u16 = 0xf4;
+
 pub fn exit_qemu(exit_code: QemuExitCode) {
     use x86_64::instructions::port::Port;
 
     unsafe {
-        let mut port = Port::new(0xf4);
+        let mut port = Port::new(QEMU_EXIT_PORT);
         port.write(exit_code as u32);
     }
 }
